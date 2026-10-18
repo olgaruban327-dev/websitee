@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLang } from '@/lib/LanguageContext'
+import { useAdmin } from '@/lib/AdminContext'
 
 export default function AdminLogin() {
   const [isOpen, setIsOpen] = useState(false)
@@ -10,7 +11,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { isAdmin, refreshAdmin } = useAdmin()
   const { lang } = useLang()
 
   const translations = {
@@ -48,21 +49,6 @@ export default function AdminLogin() {
 
   const tr = translations[lang]
 
-  // Проверяем аутентификацию при загрузке
-  useEffect(() => {
-    checkAuth()
-  }, [])
-
-  async function checkAuth() {
-    try {
-      const res = await fetch('/api/auth/verify')
-      const data = await res.json()
-      setIsAuthenticated(data.authenticated)
-    } catch (err) {
-      setIsAuthenticated(false)
-    }
-  }
-
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError('')
@@ -81,7 +67,7 @@ export default function AdminLogin() {
         return
       }
 
-      setIsAuthenticated(true)
+      await refreshAdmin()
       setIsOpen(false)
       setUsername('')
       setPassword('')
@@ -95,7 +81,7 @@ export default function AdminLogin() {
   async function handleLogout() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
-      setIsAuthenticated(false)
+      await refreshAdmin()
     } catch (err) {
       console.error('Logout failed:', err)
     }
@@ -105,7 +91,7 @@ export default function AdminLogin() {
     <>
       {/* Кнопка входа/выхода в навигации */}
       <div className="relative">
-        {isAuthenticated ? (
+        {isAdmin ? (
           <div className="flex items-center gap-3">
             <span className="text-xs text-[var(--color-warm)]/60 hidden md:inline">
               {tr.welcome}

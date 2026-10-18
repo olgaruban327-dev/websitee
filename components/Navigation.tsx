@@ -17,6 +17,7 @@ export default function Navigation() {
   const navLinks = [
     { label: tr.nav_story,    href: '#story' },
     { label: tr.nav_songs,    href: '#songs' },
+    { label: tr.nav_poems,    href: '#poems' },
     { label: tr.nav_stories,  href: '#stories' },
     { label: tr.nav_youtube,  href: 'https://www.youtube.com/@stanbarmotin9618', external: true },
     { label: tr.nav_contacts, href: '#contact' },
@@ -55,9 +56,21 @@ export default function Navigation() {
             className="font-serif text-xl tracking-wide text-[var(--color-paper)] hover:text-[var(--color-warm)] transition-colors duration-300 block">
             {tr.hero_eyebrow}
           </a>
-          <p className="text-[0.85rem] text-white mt-1 font-normal tracking-wide"
-            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.05em', fontWeight: 400 }}>
-            © Все стихи защищены авторским правом
+          <p className="text-[0.78rem] text-white/90 mt-1 font-normal tracking-wide"
+            style={{ fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em', fontWeight: 400 }}>
+            {tr.copyright}
+          </p>
+          <p
+            className="mt-1.5 max-w-[16.5rem] sm:max-w-[20rem] leading-snug"
+            style={{
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+              fontStyle: 'italic',
+              fontSize: '0.78rem',
+              color: 'rgba(240,235,224,0.78)',
+              lineHeight: 1.45,
+            }}
+          >
+            {tr.copyright_rights}
           </p>
         </div>
 
@@ -69,7 +82,7 @@ export default function Navigation() {
               href={link.href}
               target={link.external ? '_blank' : undefined}
               rel={link.external ? 'noopener noreferrer' : undefined}
-              className="group relative px-3 py-2 transition-all duration-300"
+              className="group relative px-4 py-2 transition-all duration-300"
               style={{
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '0.72rem',
@@ -106,6 +119,7 @@ export default function Navigation() {
 
         {/* Бургер — мобильный */}
         <div className="relative z-[60] md:hidden flex items-center gap-3">
+          <AdminLogin />
           <LanguageSwitcher />
           <button
             onClick={() => setMenuOpen(v => !v)}

@@ -1,38 +1,24 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState } from 'react'
 import { songs } from '@/lib/data'
 import Counter from '@/components/ui/Counter'
 import FadeIn from '@/components/ui/FadeIn'
 import AddSongModal from '@/components/AddSongModal'
 import { useLang } from '@/lib/LanguageContext'
 import { t, songI18n } from '@/lib/translations'
+import { useAdmin } from '@/lib/AdminContext'
 
 export default function SongsArchive() {
   const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px 0px' })
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [songsList, setSongsList] = useState(songs)
   const { lang } = useLang()
   const copy = t[lang]
-
-  // Проверяем аутентификацию администратора
-  useEffect(() => {
-    checkAuth()
-  }, [])
-
-  async function checkAuth() {
-    try {
-      const res = await fetch('/api/auth/verify')
-      const data = await res.json()
-      setIsAuthenticated(data.authenticated)
-    } catch (err) {
-      setIsAuthenticated(false)
-    }
-  }
+  const { isAdmin: isAuthenticated } = useAdmin()
 
   function handleSongAdded() {
     // Перезагружаем страницу для обновления списка песен

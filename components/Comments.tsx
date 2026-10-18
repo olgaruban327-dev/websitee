@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import FadeIn from '@/components/ui/FadeIn'
 import { useLang } from '@/lib/LanguageContext'
 import { t } from '@/lib/translations'
+import { useAdmin } from '@/lib/AdminContext'
 
 interface Comment {
   id: string
@@ -21,26 +22,14 @@ export default function Comments() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
   const [cooldownSeconds, setCooldownSeconds] = useState(0)
   const { lang } = useLang()
   const copy = t[lang]
+  const { isAdmin } = useAdmin()
 
-  // Загружаем комментарии и проверяем админа
   useEffect(() => {
     fetchComments()
-    checkAdmin()
   }, [])
-
-  async function checkAdmin() {
-    try {
-      const res = await fetch('/api/auth/verify')
-      const data = await res.json()
-      setIsAdmin(data.authenticated)
-    } catch {
-      setIsAdmin(false)
-    }
-  }
 
   async function fetchComments() {
     try {

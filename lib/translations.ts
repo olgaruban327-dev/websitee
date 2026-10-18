@@ -15,6 +15,7 @@ export function isLang(value: string | null): value is Lang {
 export type Copy = {
   nav_story: string
   nav_songs: string
+  nav_poems: string
   nav_stories: string
   nav_youtube: string
   nav_contacts: string
@@ -103,15 +104,21 @@ export type Copy = {
   finale_line2: string
   finale_continues: string
   footer_tagline: string
+  contact_caption: string
+  contact_title: string
+  contact_lead: string
+  contact_write: string
+  contact_copied: string
   switch_lang: string
   menu_open: string
   menu_close: string
   copyright: string
+  copyright_rights: string
 }
 
 export const t: Record<Lang, Copy> = {
   ru: {
-    nav_story: 'История', nav_songs: 'Песни', nav_stories: 'Истории',
+    nav_story: 'История', nav_songs: 'Песни', nav_poems: 'Стихи', nav_stories: 'Истории',
     nav_youtube: 'YouTube', nav_contacts: 'Контакты',
     hero_eyebrow: 'Ольга Рубан',
     hero_line1: 'Жизнь удивительна.',
@@ -191,14 +198,20 @@ export const t: Record<Lang, Copy> = {
     finale_line2: 'Нужно только уметь удивляться!',
     finale_continues: 'Наша история продолжается.',
     footer_tagline: 'Сделано из историй, музыки и человеческих чувств.',
+    contact_caption: 'Контакты',
+    contact_title: 'Напишите мне',
+    contact_lead: 'Если у вас есть слова, которые хочется сказать — они найдут меня здесь.',
+    contact_write: 'Написать письмо',
+    contact_copied: 'Адрес скопирован',
     switch_lang: 'Язык',
     menu_open: 'Открыть меню',
     menu_close: 'Закрыть меню',
     copyright: '© Все стихи защищены авторским правом',
+    copyright_rights: 'Использование стихов для создания песен, публичного исполнения или коммерческого релиза возможно только после подписания договора и согласования авторских отчислений (роялти).',
   },
 
   en: {
-    nav_story: 'Story', nav_songs: 'Songs', nav_stories: 'Stories',
+    nav_story: 'Story', nav_songs: 'Songs', nav_poems: 'Poems', nav_stories: 'Stories',
     nav_youtube: 'YouTube', nav_contacts: 'Contacts',
     hero_eyebrow: 'Olga Ruban',
     hero_line1: 'Life is wonderful.',
@@ -278,13 +291,20 @@ export const t: Record<Lang, Copy> = {
     finale_line2: 'You just have to know how to be amazed!',
     finale_continues: 'Our story continues.',
     footer_tagline: 'Made of stories, music and human feelings.',
+    contact_caption: 'Contacts',
+    contact_title: 'Write to me',
+    contact_lead: 'If you have words you would like to say — they will find me here.',
+    contact_write: 'Send a letter',
+    contact_copied: 'Address copied',
     switch_lang: 'Language',
     menu_open: 'Open menu',
     menu_close: 'Close menu',
+    copyright: '© All poems are protected by copyright',
+    copyright_rights: 'Using the poems to create songs, for public performance or a commercial release is possible only after signing a contract and agreeing on royalties.',
   },
 
   de: {
-    nav_story: 'Geschichte', nav_songs: 'Lieder', nav_stories: 'Geschichten',
+    nav_story: 'Geschichte', nav_songs: 'Lieder', nav_poems: 'Gedichte', nav_stories: 'Geschichten',
     nav_youtube: 'YouTube', nav_contacts: 'Kontakt',
     hero_eyebrow: 'Olga Ruban',
     hero_line1: 'Das Leben ist wunderbar.',
@@ -364,9 +384,16 @@ export const t: Record<Lang, Copy> = {
     finale_line2: 'Man muss nur staunen können!',
     finale_continues: 'Unsere Geschichte geht weiter.',
     footer_tagline: 'Gemacht aus Geschichten, Musik und menschlichen Gefühlen.',
+    contact_caption: 'Kontakt',
+    contact_title: 'Schreiben Sie mir',
+    contact_lead: 'Wenn Sie Worte haben, die gesagt werden wollen — sie finden mich hier.',
+    contact_write: 'Einen Brief schreiben',
+    contact_copied: 'Adresse kopiert',
     switch_lang: 'Sprache',
     menu_open: 'Menü öffnen',
     menu_close: 'Menü schließen',
+    copyright: '© Alle Gedichte sind urheberrechtlich geschützt',
+    copyright_rights: 'Die Verwendung der Gedichte zur Erstellung von Liedern, für öffentliche Aufführungen oder eine kommerzielle Veröffentlichung ist nur nach Unterzeichnung eines Vertrags und Vereinbarung der Tantiemen (Royalties) möglich.',
   },
 }
 

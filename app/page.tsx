@@ -5,6 +5,7 @@ import PhoneCall from '@/components/sections/PhoneCall'
 import FourLines from '@/components/sections/FourLines'
 import WordStream from '@/components/sections/WordStream'
 import SongsArchive from '@/components/sections/SongsArchive'
+import Poems from '@/components/sections/Poems'
 import Languages from '@/components/sections/Languages'
 import NeverMet from '@/components/sections/NeverMet'
 import DistanceMetaphor from '@/components/sections/DistanceMetaphor'
@@ -15,6 +16,7 @@ import Stories from '@/components/sections/Stories'
 import Philosophy from '@/components/sections/Philosophy'
 import Finale from '@/components/sections/Finale'
 import Comments from '@/components/Comments'
+import Contact from '@/components/sections/Contact'
 import Footer from '@/components/Footer'
 
 export default function Home() {
@@ -27,6 +29,7 @@ export default function Home() {
       <FourLines />
       <WordStream />
       <SongsArchive />
+      <Poems />
       <Languages />
       <NeverMet />
       <DistanceMetaphor />
@@ -37,6 +40,7 @@ export default function Home() {
       <Philosophy />
       <Finale />
       <Comments />
+      <Contact />
       <Footer />
     </main>
   )

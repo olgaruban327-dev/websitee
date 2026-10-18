@@ -44,3 +44,4 @@ next-env.d.ts
 
 # comments data
 /data/comments.json
+/data/poems.json

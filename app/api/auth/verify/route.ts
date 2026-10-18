@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as crypto from 'crypto'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-do-not-use-in-production'
+const JWT_SECRET = process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET || 'dev-secret-do-not-use-in-production'
 
 // Проверка наличия переменной окружения в продакшене (отключена для сборки)
 // if (process.env.NODE_ENV === 'production' && !JWT_SECRET) {
@@ -41,19 +41,19 @@ export async function GET(request: NextRequest) {
     const token = request.cookies.get('admin_token')?.value
 
     if (!token) {
-      return NextResponse.json({ authenticated: false }, { status: 401 })
+      return NextResponse.json({ authenticated: false, isAdmin: false }, { status: 401 })
     }
 
     // Верифицируем токен
     const payload = verifyToken(token)
 
     if (payload && payload.role === 'admin') {
-      return NextResponse.json({ authenticated: true, username: payload.username })
+      return NextResponse.json({ authenticated: true, isAdmin: true, username: payload.username })
     }
 
-    return NextResponse.json({ authenticated: false }, { status: 401 })
+    return NextResponse.json({ authenticated: false, isAdmin: false }, { status: 401 })
   } catch (error) {
     console.error('Verification error:', error)
-    return NextResponse.json({ authenticated: false }, { status: 401 })
+    return NextResponse.json({ authenticated: false, isAdmin: false }, { status: 401 })
   }
 }

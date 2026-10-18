@@ -16,13 +16,19 @@ export default function Footer() {
   ]
 
   return (
-    <footer id="contact" className="bg-[#080706] border-t border-[rgba(196,168,130,0.06)] py-16 px-6 md:px-12">
+    <footer className="bg-[#080706] border-t border-[rgba(196,168,130,0.06)] py-16 px-6 md:px-12">
       <div className="max-w-5xl mx-auto">
         <FadeIn className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
           <div>
             <p className="font-serif text-xl font-light text-[var(--color-paper)]">
               {tr.hero_eyebrow}
             </p>
+            <a
+              href="mailto:olgaruban@web.de"
+              className="mt-2 inline-block text-[0.9rem] font-serif italic text-[var(--color-warm)]/70 hover:text-[var(--color-warm)] transition-colors duration-300"
+            >
+              olgaruban@web.de
+            </a>
           </div>
           <nav className="flex flex-wrap gap-6 md:gap-8">
             {links.map(link => (
@@ -40,6 +46,9 @@ export default function Footer() {
         </FadeIn>
 
         <FadeIn delay={0.2} className="mt-12 pt-8 border-t border-[rgba(196,168,130,0.05)]">
+          <p className="font-serif text-[0.95rem] italic text-[var(--color-paper)]/45 text-center max-w-2xl mx-auto leading-relaxed mb-4">
+            {tr.copyright_rights}
+          </p>
           <p className="font-serif text-[0.95rem] italic text-[var(--color-paper)]/35 text-center">
             {tr.footer_tagline}
           </p>
