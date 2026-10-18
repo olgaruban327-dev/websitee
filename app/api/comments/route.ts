@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { promises as fs } from 'fs'
-import path from 'path'
 import { verifyAdmin } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 // Список запрещенных слов (мат и спам)
 const FORBIDDEN_WORDS = [
@@ -14,22 +13,6 @@ const FORBIDDEN_WORDS = [
   // Спам слова
   'casino', 'viagra', 'porn', 'xxx', 'bitcoin', 'crypto', 'loan', 'click here',
 ]
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'comments.json')
-
-interface Comment {
-  id: string
-  name: string
-  text: string
-  timestamp: number
-  ip: string
-}
-
-interface CommentsData {
-  comments: Comment[]
-  ips: string[]
-  lastCommentTime: Record<string, number> // IP -> timestamp последнего комментария
-}
 
 // Функция для получения IP адреса
 function getClientIp(request: NextRequest): string {
@@ -53,40 +36,17 @@ function containsForbiddenWords(text: string): boolean {
   return FORBIDDEN_WORDS.some(word => lowerText.includes(word))
 }
 
-// Функция для чтения комментариев
-async function readComments(): Promise<CommentsData> {
-  try {
-    const data = await fs.readFile(DATA_FILE, 'utf-8')
-    const parsed = JSON.parse(data)
-    // Обеспечиваем наличие lastCommentTime
-    return {
-      comments: parsed.comments || [],
-      ips: parsed.ips || [],
-      lastCommentTime: parsed.lastCommentTime || {},
-    }
-  } catch {
-    return { comments: [], ips: [], lastCommentTime: {} }
-  }
-}
-
-// Функция для сохранения комментариев
-async function saveComments(data: CommentsData): Promise<void> {
-  const dir = path.dirname(DATA_FILE)
-  try {
-    await fs.access(dir)
-  } catch {
-    await fs.mkdir(dir, { recursive: true })
-  }
-  await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2))
-}
-
 // GET - получить все комментарии
 export async function GET() {
   try {
-    const data = await readComments()
-    // Не возвращаем IP адреса клиенту
-    const publicComments = data.comments.map(({ ip, ...comment }) => comment)
-    return NextResponse.json({ comments: publicComments })
+    const { data: comments, error } = await supabase
+      .from('comments')
+      .select('id, name, text, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return NextResponse.json({ comments: comments || [] })
   } catch (error) {
     console.error('Error reading comments:', error)
     return NextResponse.json({ error: 'Failed to load comments' }, { status: 500 })
@@ -122,50 +82,63 @@ export async function POST(request: NextRequest) {
     }
 
     const clientIp = getClientIp(request)
-    const data = await readComments()
 
     // АНТИ-ФЛУД: Проверяем время последнего комментария от этого IP
-    const now = Date.now()
-    const lastTime = data.lastCommentTime[clientIp]
-    const FLOOD_TIMEOUT = 60 * 1000 // 1 минута в миллисекундах
+    const FLOOD_TIMEOUT_MINUTES = 1
+    const floodCheck = new Date()
+    floodCheck.setMinutes(floodCheck.getMinutes() - FLOOD_TIMEOUT_MINUTES)
 
-    if (lastTime && (now - lastTime) < FLOOD_TIMEOUT) {
-      const secondsLeft = Math.ceil((FLOOD_TIMEOUT - (now - lastTime)) / 1000)
+    const { data: recentComments } = await supabase
+      .from('comments')
+      .select('created_at')
+      .eq('ip', clientIp)
+      .gte('created_at', floodCheck.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+
+    if (recentComments && recentComments.length > 0) {
+      const lastCommentTime = new Date(recentComments[0].created_at).getTime()
+      const now = Date.now()
+      const secondsLeft = Math.ceil((FLOOD_TIMEOUT_MINUTES * 60 * 1000 - (now - lastCommentTime)) / 1000)
+      
       return NextResponse.json(
         { error: `Please wait ${secondsLeft} seconds before posting again` },
         { status: 429 }
       )
     }
 
-    // Проверка: один комментарий на IP
-    if (data.ips.includes(clientIp)) {
+    // Проверка: один комментарий на IP (всего)
+    const { data: existingComments } = await supabase
+      .from('comments')
+      .select('id')
+      .eq('ip', clientIp)
+      .limit(1)
+
+    if (existingComments && existingComments.length > 0) {
       return NextResponse.json({ error: 'You have already left a comment' }, { status: 429 })
     }
 
     // Создаем новый комментарий
-    const newComment: Comment = {
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      name: name.trim(),
-      text: text.trim(),
-      timestamp: Date.now(),
-      ip: clientIp,
-    }
+    const { data: newComment, error } = await supabase
+      .from('comments')
+      .insert([
+        {
+          name: name.trim(),
+          text: text.trim(),
+          ip: clientIp,
+        }
+      ])
+      .select('id, name, text, created_at')
+      .single()
 
-    data.comments.push(newComment)
-    data.ips.push(clientIp)
-    data.lastCommentTime[clientIp] = now
+    if (error) throw error
 
-    await saveComments(data)
-
-    // Возвращаем комментарий без IP
-    const { ip, ...publicComment } = newComment
-    return NextResponse.json({ comment: publicComment }, { status: 201 })
+    return NextResponse.json({ comment: newComment }, { status: 201 })
   } catch (error) {
     console.error('Error creating comment:', error)
     return NextResponse.json({ error: 'Failed to create comment' }, { status: 500 })
   }
 }
-
 
 // DELETE - удалить комментарий (только для админа)
 export async function DELETE(request: NextRequest) {
@@ -183,29 +156,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Comment ID required' }, { status: 400 })
     }
 
-    const data = await readComments()
-    const commentIndex = data.comments.findIndex(c => c.id === commentId)
+    const { error } = await supabase
+      .from('comments')
+      .delete()
+      .eq('id', commentId)
 
-    if (commentIndex === -1) {
-      return NextResponse.json({ error: 'Comment not found' }, { status: 404 })
-    }
-
-    // Удаляем комментарий и его IP из списка
-    const removedComment = data.comments[commentIndex]
-    data.comments.splice(commentIndex, 1)
-    
-    // Удаляем IP, чтобы пользователь мог оставить новый комментарий
-    const ipIndex = data.ips.indexOf(removedComment.ip)
-    if (ipIndex !== -1) {
-      data.ips.splice(ipIndex, 1)
-    }
-
-    // Удаляем время последнего комментария для этого IP
-    if (data.lastCommentTime && data.lastCommentTime[removedComment.ip]) {
-      delete data.lastCommentTime[removedComment.ip]
-    }
-
-    await saveComments(data)
+    if (error) throw error
 
     return NextResponse.json({ success: true, message: 'Comment deleted' })
   } catch (error) {

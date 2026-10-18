@@ -1,26 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyAdmin } from '@/lib/auth'
-import fs from 'fs/promises'
-import path from 'path'
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'poems.json')
-
-// Инициализация файла если не существует
-async function ensureDataFile() {
-  try {
-    await fs.access(DATA_FILE)
-  } catch {
-    await fs.writeFile(DATA_FILE, JSON.stringify({ poems: [] }, null, 2), 'utf-8')
-  }
-}
+import { supabaseAdmin } from '@/lib/supabase'
 
 // GET - получить все стихи
 export async function GET() {
   try {
-    await ensureDataFile()
-    const content = await fs.readFile(DATA_FILE, 'utf-8')
-    const data = JSON.parse(content)
-    return NextResponse.json(data)
+    const { data: poems, error } = await supabaseAdmin
+      .from('poems')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+
+    return NextResponse.json({ poems: poems || [] })
   } catch (error) {
     console.error('Error reading poems:', error)
     return NextResponse.json({ poems: [] })
@@ -43,27 +35,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Title and text are required' }, { status: 400 })
     }
 
-    await ensureDataFile()
-    const content = await fs.readFile(DATA_FILE, 'utf-8')
-    const data = JSON.parse(content)
+    const { data: poem, error } = await supabaseAdmin
+      .from('poems')
+      .insert([{ title: title.trim(), text: text.trim() }])
+      .select()
+      .single()
 
-    // Находим максимальный ID
-    const maxId = data.poems.length > 0
-      ? Math.max(...data.poems.map((p: any) => p.id))
-      : 0
+    if (error) throw error
 
-    const newPoem = {
-      id: maxId + 1,
-      title: title.trim(),
-      text: text.trim(),
-      date: new Date().toISOString(),
-    }
-
-    data.poems.push(newPoem)
-
-    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8')
-
-    return NextResponse.json({ success: true, poem: newPoem })
+    return NextResponse.json({ success: true, poem })
   } catch (error) {
     console.error('Error adding poem:', error)
     return NextResponse.json({ error: 'Failed to add poem' }, { status: 500 })
@@ -86,13 +66,12 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'ID is required' }, { status: 400 })
     }
 
-    await ensureDataFile()
-    const content = await fs.readFile(DATA_FILE, 'utf-8')
-    const data = JSON.parse(content)
+    const { error } = await supabaseAdmin
+      .from('poems')
+      .delete()
+      .eq('id', id)
 
-    data.poems = data.poems.filter((p: any) => p.id !== id)
-
-    await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8')
+    if (error) throw error
 
     return NextResponse.json({ success: true })
   } catch (error) {
