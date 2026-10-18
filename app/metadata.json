@@ -1,0 +1,13 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Ольга Рубан",
+  "alternateName": ["Olga Ruban", "Olga Ruban Poetry"],
+  "description": "Поэтесса и автор песен. 400+ произведений на 7 языках.",
+  "url": "https://olgaruban.com",
+  "jobTitle": "Поэтесса",
+  "knowsLanguage": ["Russian", "English", "German", "Italian", "French", "Arabic", "Hebrew"],
+  "sameAs": [
+    "https://www.youtube.com/@stanbarmotin9618"
+  ]
+}

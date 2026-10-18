@@ -5,12 +5,41 @@ import { AdminProvider } from '@/lib/AdminContext'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Жизнь удивительна — Ольга Рубан',
-  description: 'История одного случайного звонка, двух людей и сотен песен, которые однажды начали жить своей собственной жизнью.',
+  title: 'Ольга Рубан | Olga Ruban - Поэтесса, Стихи, Песни',
+  description: 'Официальный сайт Ольги Рубан (Olga Ruban) - поэтессы и автора песен. 400+ произведений на 7 языках. Стихи, песни, истории. Life is wonderful - you just have to know how to be amazed!',
+  keywords: ['Ольга Рубан', 'Olga Ruban', 'поэтесса', 'poet', 'стихи', 'poems', 'песни', 'songs', 'Ruban poetry', 'Ольга Рубан стихи', 'Olga Ruban poems'],
+  authors: [{ name: 'Ольга Рубан' }, { name: 'Olga Ruban' }],
+  creator: 'Ольга Рубан',
+  publisher: 'Ольга Рубан',
   openGraph: {
-    title: 'Жизнь удивительна — Ольга Рубан',
-    description: 'История одного случайного звонка, двух людей и сотен песен.',
+    title: 'Ольга Рубан | Olga Ruban - Поэтесса',
+    description: 'Официальный сайт Ольги Рубан. Стихи, песни, истории на 7 языках. 400+ произведений.',
     type: 'website',
+    locale: 'ru_RU',
+    alternateLocale: ['en_US', 'de_DE'],
+    siteName: 'Ольга Рубан | Olga Ruban',
+    url: 'https://olgaruban.com',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ольга Рубан | Olga Ruban - Поэтесса',
+    description: 'Официальный сайт Ольги Рубан. Стихи, песни, истории.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  alternates: {
+    canonical: 'https://olgaruban.com',
+    languages: {
+      'ru': 'https://olgaruban.com',
+      'en': 'https://olgaruban.com',
+      'de': 'https://olgaruban.com',
+    },
   },
 }
 
