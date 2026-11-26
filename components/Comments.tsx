@@ -103,13 +103,13 @@ export default function Comments() {
     }, 1000)
   }
 
-  async function handleDelete(commentId: string) {
+  async function handleDelete(commentId: string | number) {
     if (!confirm('Are you sure you want to delete this comment?')) {
       return
     }
 
     try {
-      const res = await fetch(`/api/comments?id=${commentId}`, {
+      const res = await fetch(`/api/comments?id=${String(commentId)}`, {
         method: 'DELETE',
       })
 
