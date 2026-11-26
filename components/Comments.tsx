@@ -8,10 +8,11 @@ import { t } from '@/lib/translations'
 import { useAdmin } from '@/lib/AdminContext'
 
 interface Comment {
-  id: string
+  id: number | string
   name: string
   text: string
-  timestamp: number
+  created_at?: string
+  timestamp?: number
 }
 
 export default function Comments() {
@@ -308,7 +309,11 @@ export default function Comments() {
             </FadeIn>
           ) : (
             comments
-              .sort((a, b) => b.timestamp - a.timestamp)
+              .sort((a, b) => {
+                const timeA = a.created_at ? new Date(a.created_at).getTime() : a.timestamp || 0
+                const timeB = b.created_at ? new Date(b.created_at).getTime() : b.timestamp || 0
+                return timeB - timeA
+              })
               .map((comment, i) => (
                 <FadeIn key={comment.id} delay={0.1 * i}>
                   <motion.div
@@ -323,7 +328,12 @@ export default function Comments() {
                       </p>
                       <div className="flex items-center gap-3">
                         <p className="text-xs text-[var(--color-muted)]/40">
-                          {new Date(comment.timestamp).toLocaleDateString(lang === 'ru' ? 'ru-RU' : lang === 'de' ? 'de-DE' : 'en-US')}
+                          {comment.created_at 
+                            ? new Date(comment.created_at).toLocaleDateString(lang === 'ru' ? 'ru-RU' : lang === 'de' ? 'de-DE' : 'en-US')
+                            : comment.timestamp 
+                              ? new Date(comment.timestamp).toLocaleDateString(lang === 'ru' ? 'ru-RU' : lang === 'de' ? 'de-DE' : 'en-US')
+                              : ''
+                          }
                         </p>
                         {isAdmin && (
                           <button
