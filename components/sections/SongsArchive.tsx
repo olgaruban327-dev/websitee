@@ -1,8 +1,7 @@
 'use client'
 
 import { motion, useInView } from 'framer-motion'
-import { useRef, useState } from 'react'
-import { songs } from '@/lib/data'
+import { useRef, useState, useEffect } from 'react'
 import Counter from '@/components/ui/Counter'
 import FadeIn from '@/components/ui/FadeIn'
 import AddSongModal from '@/components/AddSongModal'
@@ -10,19 +9,43 @@ import { useLang } from '@/lib/LanguageContext'
 import { t, songI18n } from '@/lib/translations'
 import { useAdmin } from '@/lib/AdminContext'
 
+interface Song {
+  id: number
+  title: string
+  year: number
+  genre: string
+  language: string
+  story: string
+  youtubeUrl?: string
+  youtube_url?: string
+}
+
 export default function SongsArchive() {
   const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px 0px' })
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [songsList, setSongsList] = useState(songs)
+  const [songsList, setSongsList] = useState<Song[]>([])
   const { lang } = useLang()
   const copy = t[lang]
   const { isAdmin: isAuthenticated } = useAdmin()
 
+  useEffect(() => {
+    fetchSongs()
+  }, [])
+
+  async function fetchSongs() {
+    try {
+      const res = await fetch('/api/songs')
+      const data = await res.json()
+      setSongsList(data.songs || [])
+    } catch (err) {
+      console.error('Failed to load songs:', err)
+    }
+  }
+
   function handleSongAdded() {
-    // Перезагружаем страницу для обновления списка песен
-    window.location.reload()
+    fetchSongs()
   }
 
   async function handleDeleteSong(songId: number) {
@@ -37,8 +60,8 @@ export default function SongsArchive() {
         return
       }
 
-      // Успешно удалено - перезагружаем страницу
-      window.location.reload()
+      // Успешно удалено - обновляем список
+      await fetchSongs()
     } catch (err) {
       alert('Ошибка при удалении песни')
     }
@@ -103,7 +126,7 @@ export default function SongsArchive() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 justify-items-center sm:justify-items-stretch">
           {songsList.map((song, i) => {
-            const songWithUrl = song as typeof song & { youtubeUrl?: string }
+            const youtubeUrl = song.youtubeUrl || song.youtube_url
             const translated = lang !== 'ru' && songI18n[lang]?.[song.id]
             const displayGenre = translated ? translated.genre : song.genre
             const displayStory = translated ? translated.story : song.story
@@ -173,14 +196,14 @@ export default function SongsArchive() {
                 </motion.p>
 
                 {/* Кнопка — только если есть ссылка */}
-                {songWithUrl.youtubeUrl && (
+                {youtubeUrl && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     style={{ marginTop: 'auto', paddingTop: '10px' }}
                   >
                     <a
-                      href={songWithUrl.youtubeUrl}
+                      href={youtubeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={e => e.stopPropagation()}
